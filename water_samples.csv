@@ -1,0 +1,6 @@
+sample_id,sample_source,temperature,humidity,ph,tds,turbidity,dissolved_oxygen,sample_timestamp,actual_category
+AQ001,Groundwater,27.5,65,7.2,320,1.8,6.8,2026-11-21 09:00:00,Groundwater
+AQ002,River Water,29.1,72,6.8,450,4.2,7.2,2026-11-21 09:15:00,River Water
+AQ003,Unknown,30.2,68,8.1,850,12.5,4.5,2026-11-21 09:30:00,Unknown
+AQ004,Seawater,28.8,75,8.0,32000,2.5,6.1,2026-11-21 09:45:00,Seawater
+AQ005,Unknown,26.9,61,7.4,280,1.2,7.0,2026-11-21 10:00:00,Unknown
