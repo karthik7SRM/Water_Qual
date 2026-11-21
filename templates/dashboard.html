@@ -1,0 +1,440 @@
+
+{% extends "base.html" %}
+
+{% block title %}Overview | AquaIntelligence{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dash-page">
+
+    <!-- PAGE HEADER -->
+    <section class="dash-header">
+        <div>
+            <div class="dash-eyebrow">
+                <span class="status-dot"></span>
+                INTELLIGENCE CENTER / OVERVIEW
+            </div>
+            <h1>Water Intelligence Dashboard</h1>
+            <p>Monitor water parameters, inspect sample trends and track water quality.</p>
+        </div>
+
+        <a href="{{ url_for('analysis') }}" class="dash-primary-btn">
+            <i class="fa-solid fa-flask"></i>
+            Analyze Sample
+        </a>
+    </section>
+
+    <!-- SYSTEM STATUS -->
+    <section class="system-strip">
+        <div class="system-strip-left">
+            <span class="system-indicator"></span>
+            <span>Platform operational</span>
+        </div>
+        <div class="system-strip-right">
+            <span>DATA SOURCE</span>
+            <strong>CSV DATASET</strong>
+            <span class="strip-divider"></span>
+            <span>MODE</span>
+            <strong>DEVELOPMENT</strong>
+        </div>
+    </section>
+
+    <!-- KPI CARDS -->
+    <section class="metric-grid">
+
+        <article class="metric-card">
+            <div class="metric-top">
+                <span class="metric-label">Total Samples</span>
+                <span class="metric-icon cyan">
+                    <i class="fa-solid fa-vial"></i>
+                </span>
+            </div>
+            <div class="metric-value">{{ total_samples }}</div>
+            <div class="metric-foot">Recorded in dataset</div>
+        </article>
+
+        <article class="metric-card">
+            <div class="metric-top">
+                <span class="metric-label">Water pH</span>
+                <span class="metric-icon purple">
+                    <i class="fa-solid fa-droplet"></i>
+                </span>
+            </div>
+            <div class="metric-value">
+                {% if latest and latest.ph is not none %}
+                    {{ "%.2f"|format(latest.ph|float) }}
+                {% else %}--{% endif %}
+            </div>
+            <div class="metric-foot">Latest recorded reading</div>
+        </article>
+
+        <article class="metric-card">
+            <div class="metric-top">
+                <span class="metric-label">TDS</span>
+                <span class="metric-icon blue">
+                    <i class="fa-solid fa-water"></i>
+                </span>
+            </div>
+            <div class="metric-value">
+                {% if latest and latest.tds is not none %}
+                    {{ "%.1f"|format(latest.tds|float) }}
+                {% else %}--{% endif %}
+                <small>ppm</small>
+            </div>
+            <div class="metric-foot">Total dissolved solids</div>
+        </article>
+
+        <article class="metric-card">
+            <div class="metric-top">
+                <span class="metric-label">Turbidity</span>
+                <span class="metric-icon orange">
+                    <i class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+            <div class="metric-value">
+                {% if latest and latest.turbidity is not none %}
+                    {{ "%.2f"|format(latest.turbidity|float) }}
+                {% else %}--{% endif %}
+                <small>NTU</small>
+            </div>
+            <div class="metric-foot">Water clarity indicator</div>
+        </article>
+
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <section class="dash-main-grid">
+
+        <!-- TREND CHART -->
+        <article class="dash-panel trend-panel">
+            <div class="panel-heading">
+                <div>
+                    <span class="panel-kicker">DATA VISUALIZATION</span>
+                    <h2>Water Parameter Trends</h2>
+                    <p>Historical readings from the latest 20 samples</p>
+                </div>
+                <span class="panel-tag">HISTORY</span>
+            </div>
+
+            {% if chart_data %}
+            <div class="chart-legend">
+                <span><i class="legend-dot ph-dot"></i> pH</span>
+                <span><i class="legend-dot tds-dot"></i> TDS</span>
+                <span><i class="legend-dot turbidity-dot"></i> Turbidity</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="waterTrendChart"></canvas>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-chart-line"></i>
+                <h3>No historical readings</h3>
+                <p>Add sample records to your CSV file to visualize trends.</p>
+            </div>
+            {% endif %}
+        </article>
+
+        <!-- LATEST SAMPLE -->
+        <article class="dash-panel latest-panel">
+            <div class="panel-heading">
+                <div>
+                    <span class="panel-kicker">LATEST RECORD</span>
+                    <h2>Sample Information</h2>
+                    <p>Most recently recorded sample</p>
+                </div>
+                <i class="fa-solid fa-circle-nodes panel-heading-icon"></i>
+            </div>
+
+            {% if latest %}
+            <div class="sample-id">
+                <span>Sample ID</span>
+                <strong>{{ latest.sample_id }}</strong>
+            </div>
+
+            <div class="sample-source">
+                <span class="source-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                </span>
+                <div>
+                    <small>Recorded source</small>
+                    <strong>{{ latest.sample_source }}</strong>
+                </div>
+            </div>
+
+            <div class="sample-detail-list">
+                <div>
+                    <span>Temperature</span>
+                    <strong>
+                        {% if latest.temperature is not none %}
+                            {{ "%.1f"|format(latest.temperature|float) }} °C
+                        {% else %}--{% endif %}
+                    </strong>
+                </div>
+                <div>
+                    <span>Humidity (environment)</span>
+                    <strong>
+                        {% if latest.humidity is not none %}
+                            {{ "%.1f"|format(latest.humidity|float) }} %
+                        {% else %}--{% endif %}
+                    </strong>
+                </div>
+                <div>
+                    <span>Dissolved Oxygen</span>
+                    <strong>
+                        {% if latest.dissolved_oxygen is not none %}
+                            {{ "%.2f"|format(latest.dissolved_oxygen|float) }} mg/L
+                        {% else %}--{% endif %}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="sample-timestamp">
+                <i class="fa-regular fa-clock"></i>
+                {{ latest.timestamp }}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-flask"></i>
+                <h3>No sample available</h3>
+                <p>Your dataset is currently empty.</p>
+            </div>
+            {% endif %}
+        </article>
+
+    </section>
+
+    <!-- INTELLIGENCE PANELS -->
+    <section class="dash-bottom-grid">
+
+        <article class="dash-panel classification-panel">
+            <div class="panel-heading">
+                <div>
+                    <span class="panel-kicker">MACHINE LEARNING</span>
+                    <h2>Water Classification</h2>
+                </div>
+                <span class="pending-tag">MODEL PENDING</span>
+            </div>
+
+            <div class="classification-content">
+                <div class="classification-symbol">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div>
+                    <h3>Classification engine not configured</h3>
+                    <p>
+                        A validated model is required before the platform
+                        can predict water source or quality categories.
+                    </p>
+                </div>
+            </div>
+
+            <a href="{{ url_for('classification') }}" class="panel-link">
+                Open classification module
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </article>
+
+        <article class="dash-panel alerts-panel">
+            <div class="panel-heading">
+                <div>
+                    <span class="panel-kicker">SYSTEM MONITORING</span>
+                    <h2>Sensor & Data Status</h2>
+                </div>
+            </div>
+
+            <div class="alert-row">
+                <span class="alert-icon">
+                    <i class="fa-solid fa-file-csv"></i>
+                </span>
+                <div>
+                    <strong>CSV data source</strong>
+                    <small>Local dataset configured</small>
+                </div>
+                <span class="status-label">READY</span>
+            </div>
+
+            <div class="alert-row">
+                <span class="alert-icon">
+                    <i class="fa-solid fa-microchip"></i>
+                </span>
+                <div>
+                    <strong>Arduino connection</strong>
+                    <small>Hardware integration pending</small>
+                </div>
+                <span class="status-label status-pending">PENDING</span>
+            </div>
+
+            <div class="alert-row">
+                <span class="alert-icon">
+                    <i class="fa-solid fa-brain"></i>
+                </span>
+                <div>
+                    <strong>ML classification</strong>
+                    <small>Model not deployed</small>
+                </div>
+                <span class="status-label status-pending">PENDING</span>
+            </div>
+        </article>
+
+    </section>
+
+</div>
+
+<section class="panel assessment-panel">
+    <div class="panel-header">
+        <div>
+            <span class="section-eyebrow">WATER INTELLIGENCE</span>
+            <h2>Water Quality Assessment</h2>
+        </div>
+        <span class="assessment-badge">
+            {{ assessment.screening_status | replace('_', ' ') | upper
+               if assessment else 'NO DATA' }}
+        </span>
+    </div>
+
+    {% if assessment and assessment.valid %}
+
+        <p class="assessment-summary">
+            {{ assessment.summary }}
+        </p>
+
+        <div class="assessment-grid">
+            {% for key, item in assessment.parameters.items() %}
+            <div class="assessment-item">
+                <div class="assessment-item-top">
+                    <span>{{ item.name }}</span>
+                    <span class="assessment-status {{ item.status }}">
+                        {{ item.status | replace('_', ' ') | upper }}
+                    </span>
+                </div>
+
+                <div class="assessment-value">
+                    {% if item.value is not none %}
+                        {{ item.value }} <small>{{ item.unit }}</small>
+                    {% else %}
+                        <small>Unavailable</small>
+                    {% endif %}
+                </div>
+
+                <p>{{ item.message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <p class="assessment-disclaimer">
+            {{ assessment.disclaimer }}
+        </p>
+
+    {% elif assessment %}
+        <p class="assessment-summary">
+            Assessment could not be completed because the input data is invalid.
+        </p>
+
+        {% for error in assessment.errors %}
+            <p class="assessment-error">{{ error }}</p>
+        {% endfor %}
+
+    {% else %}
+        <p>No water samples are available for assessment.</p>
+    {% endif %}
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const sampleChartData = JSON.parse(
+    document.getElementById("chart-data").textContent
+);
+
+    window.addEventListener("DOMContentLoaded", function () {
+        if (!sampleChartData || sampleChartData.length === 0) return;
+
+        const canvas = document.getElementById("waterTrendChart");
+        if (!canvas) return;
+
+        const labels = sampleChartData.map((sample, index) => {
+            return "Sample " + (index + 1);
+        });
+
+        const chart = new Chart(canvas, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "pH",
+                        data: sampleChartData.map(s => s.ph),
+                        borderColor: "#35d6c2",
+                        backgroundColor: "rgba(53, 214, 194, 0.08)",
+                        yAxisID: "y",
+                        tension: 0.35,
+                        pointRadius: 3
+                    },
+                    {
+                        label: "TDS",
+                        data: sampleChartData.map(s => s.tds),
+                        borderColor: "#729cff",
+                        backgroundColor: "rgba(114, 156, 255, 0.08)",
+                        yAxisID: "y1",
+                        tension: 0.35,
+                        pointRadius: 3
+                    },
+                    {
+                        label: "Turbidity",
+                        data: sampleChartData.map(s => s.turbidity),
+                        borderColor: "#f5ad67",
+                        backgroundColor: "rgba(245, 173, 103, 0.08)",
+                        yAxisID: "y2",
+                        tension: 0.35,
+                        pointRadius: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: "index",
+                    intersect: false
+                },
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { color: "rgba(255,255,255,0.04)" },
+                        ticks: { color: "#8995aa" }
+                    },
+                    y: {
+                        type: "linear",
+                        position: "left",
+                        title: { display: true, text: "pH", color: "#35d6c2" },
+                        grid: { color: "rgba(255,255,255,0.05)" },
+                        ticks: { color: "#8995aa" }
+                    },
+                    y1: {
+                        type: "linear",
+                        position: "right",
+                        title: { display: true, text: "TDS (ppm)", color: "#729cff" },
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: "#8995aa" }
+                    },
+                    y2: {
+                        type: "linear",
+                        display: false,
+                        position: "right"
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+
+{% extends "base.html" %}
+
+{% block title %}Sample Analysis | AquaIntelligence{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/analysis.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="analysis-page">
+
+    <div class="page-heading">
+        <div>
+            <span class="section-eyebrow">INTELLIGENCE CENTER</span>
+            <h1>Sample Analysis</h1>
+            <p>Inspect and evaluate individual water samples.</p>
+        </div>
+
+        <span class="sample-count">
+            {{ samples|length }} SAMPLES AVAILABLE
+        </span>
+    </div>
+
+    {% if samples %}
+
+    <div class="analysis-selector panel">
+        <label for="sampleSelect">Select Water Sample</label>
+
+        <select id="sampleSelect">
+            {% for sample in samples %}
+            <option value="{{ loop.index0 }}">
+                {{ sample.sample_id }} — {{ sample.sample_source }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <div class="selected-meta">
+            <span id="selectedSource">Source: --</span>
+            <span id="selectedTimestamp">Timestamp: --</span>
+        </div>
+    </div>
+
+    <div class="analysis-overview">
+        <div class="panel overview-card">
+            <span>pH LEVEL</span>
+            <strong id="phValue">--</strong>
+            <small>Acidity / Alkalinity</small>
+        </div>
+
+        <div class="panel overview-card">
+            <span>TDS</span>
+            <strong id="tdsValue">--</strong>
+            <small>mg/L</small>
+        </div>
+
+        <div class="panel overview-card">
+            <span>TURBIDITY</span>
+            <strong id="turbidityValue">--</strong>
+            <small>NTU</small>
+        </div>
+
+        <div class="panel overview-card">
+            <span>TEMPERATURE</span>
+            <strong id="temperatureValue">--</strong>
+            <small>°C</small>
+        </div>
+    </div>
+
+    <div class="panel parameter-panel">
+        <div class="panel-heading">
+            <div>
+                <span class="section-eyebrow">PARAMETER BREAKDOWN</span>
+                <h2>Sensor Measurements</h2>
+            </div>
+        </div>
+
+        <div id="parameterGrid" class="parameter-grid"></div>
+    </div>
+
+    <div class="panel analysis-note">
+        <h3>Assessment Information</h3>
+        <p>
+            Measurements are compared against configured screening
+            reference values. This is not a laboratory certification
+            of drinking-water safety.
+        </p>
+    </div>
+
+    {% else %}
+
+    <div class="panel empty-state">
+        <h2>No Water Samples Available</h2>
+        <p>Add sample records to your CSV file to begin analysis.</p>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% if samples %}
+<script id="sample-data" type="application/json">
+    {{ samples | tojson }}
+</script>
+
+<script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+{% endif %}
+
+{% endblock %}

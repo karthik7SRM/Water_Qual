@@ -1,0 +1,239 @@
+
+{% extends "base.html" %}
+
+{% block title %}Live Monitoring | AquaIntelligence{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/monitoring.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="monitor-page">
+
+    <section class="monitor-header">
+        <div>
+            <div class="monitor-eyebrow">INTELLIGENCE CENTER / LIVE MONITORING</div>
+            <h1>Live Sensor Monitoring</h1>
+            <p>Observe water parameters and track incoming sensor readings.</p>
+        </div>
+
+        <div class="monitor-mode">
+            <span class="pulse-dot"></span>
+            <span>SIMULATION MODE</span>
+        </div>
+    </section>
+
+    <section class="monitor-connection">
+        <div class="connection-left">
+            <span class="connection-icon">
+                <i class="fa-solid fa-microchip"></i>
+            </span>
+            <div>
+                <strong>Sensor Data Stream</strong>
+                <small id="connectionMessage">Connecting to simulator...</small>
+            </div>
+        </div>
+
+        <div class="connection-right">
+            <span>UPDATE INTERVAL</span>
+            <strong>3 SECONDS</strong>
+        </div>
+    </section>
+
+    <section class="sensor-grid">
+
+        <article class="sensor-card">
+            <div class="sensor-card-top">
+                <span>WATER pH</span>
+                <i class="fa-solid fa-droplet sensor-cyan"></i>
+            </div>
+            <div class="sensor-reading">
+                <strong id="phValue">--</strong>
+                <span>pH</span>
+            </div>
+            <div class="sensor-description">Acidity / alkalinity indicator</div>
+            <div class="sensor-track">
+                <div class="sensor-track-fill ph-fill" id="phBar"></div>
+            </div>
+            <div class="sensor-footer">
+                <span>Scale: 0–14</span>
+                <strong id="phStatus">WAITING</strong>
+            </div>
+        </article>
+
+        <article class="sensor-card">
+            <div class="sensor-card-top">
+                <span>TEMPERATURE</span>
+                <i class="fa-solid fa-temperature-half sensor-orange"></i>
+            </div>
+            <div class="sensor-reading">
+                <strong id="temperatureValue">--</strong>
+                <span>°C</span>
+            </div>
+            <div class="sensor-description">Water temperature</div>
+            <div class="sensor-track">
+                <div class="sensor-track-fill temp-fill" id="temperatureBar"></div>
+            </div>
+            <div class="sensor-footer">
+                <span>Live measurement</span>
+                <strong id="temperatureStatus">WAITING</strong>
+            </div>
+        </article>
+
+        <article class="sensor-card">
+            <div class="sensor-card-top">
+                <span>TDS</span>
+                <i class="fa-solid fa-water sensor-blue"></i>
+            </div>
+            <div class="sensor-reading">
+                <strong id="tdsValue">--</strong>
+                <span>ppm</span>
+            </div>
+            <div class="sensor-description">Total dissolved solids</div>
+            <div class="sensor-track">
+                <div class="sensor-track-fill tds-fill" id="tdsBar"></div>
+            </div>
+            <div class="sensor-footer">
+                <span>Simulated reading</span>
+                <strong id="tdsStatus">WAITING</strong>
+            </div>
+        </article>
+
+        <article class="sensor-card">
+            <div class="sensor-card-top">
+                <span>TURBIDITY</span>
+                <i class="fa-solid fa-eye sensor-purple"></i>
+            </div>
+            <div class="sensor-reading">
+                <strong id="turbidityValue">--</strong>
+                <span>NTU</span>
+            </div>
+            <div class="sensor-description">Water cloudiness indicator</div>
+            <div class="sensor-track">
+                <div class="sensor-track-fill turbidity-fill" id="turbidityBar"></div>
+            </div>
+            <div class="sensor-footer">
+                <span>Simulated reading</span>
+                <strong id="turbidityStatus">WAITING</strong>
+            </div>
+        </article>
+
+        <article class="sensor-card environment-card">
+            <div class="sensor-card-top">
+                <span>ENVIRONMENTAL HUMIDITY</span>
+                <i class="fa-solid fa-cloud sensor-blue"></i>
+            </div>
+            <div class="sensor-reading">
+                <strong id="humidityValue">--</strong>
+                <span>%</span>
+            </div>
+            <div class="sensor-description">Ambient humidity near the device</div>
+            <div class="sensor-track">
+                <div class="sensor-track-fill humidity-fill" id="humidityBar"></div>
+            </div>
+            <div class="sensor-footer">
+                <span>Environmental parameter</span>
+                <strong id="humidityStatus">WAITING</strong>
+            </div>
+        </article>
+
+    </section>
+
+    <section class="monitor-content-grid">
+
+        <article class="monitor-panel">
+            <div class="monitor-panel-heading">
+                <div>
+                    <span class="monitor-kicker">REAL-TIME VISUALIZATION</span>
+                    <h2>Sensor Activity</h2>
+                    <p>Live values over the latest updates</p>
+                </div>
+                <span class="live-tag"><span></span> LIVE</span>
+            </div>
+
+            <div class="monitor-chart-wrap">
+                <canvas id="liveSensorChart"></canvas>
+            </div>
+        </article>
+
+        <article class="monitor-panel activity-panel">
+            <div class="monitor-panel-heading">
+                <div>
+                    <span class="monitor-kicker">STREAM INFORMATION</span>
+                    <h2>Device Activity</h2>
+                    <p>Current monitoring session</p>
+                </div>
+            </div>
+
+            <div class="activity-stat">
+                <span>Connection mode</span>
+                <strong class="simulation-text">SIMULATOR</strong>
+            </div>
+
+            <div class="activity-stat">
+                <span>Successful updates</span>
+                <strong id="updateCount">0</strong>
+            </div>
+
+            <div class="activity-stat">
+                <span>Last received reading</span>
+                <strong id="lastUpdate">Waiting...</strong>
+            </div>
+
+            <div class="activity-stat">
+                <span>Stream status</span>
+                <strong id="streamStatus">INITIALIZING</strong>
+            </div>
+
+            <div class="activity-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>
+                    Simulated sensor values are for interface testing only.
+                    They are not actual water measurements.
+                </p>
+            </div>
+        </article>
+
+    </section>
+
+    <section class="monitor-panel reading-log">
+        <div class="monitor-panel-heading">
+            <div>
+                <span class="monitor-kicker">LATEST DATA</span>
+                <h2>Incoming Readings</h2>
+                <p>Most recent simulated sensor updates</p>
+            </div>
+            <span class="log-count" id="logCount">0 RECORDS</span>
+        </div>
+
+        <div class="table-scroll">
+            <table class="reading-table">
+                <thead>
+                    <tr>
+                        <th>TIME</th>
+                        <th>pH</th>
+                        <th>TEMPERATURE</th>
+                        <th>TDS</th>
+                        <th>TURBIDITY</th>
+                        <th>MODE</th>
+                    </tr>
+                </thead>
+                <tbody id="readingTableBody">
+                    <tr>
+                        <td colspan="6" class="table-empty">Waiting for incoming readings...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/monitoring.js') }}"></script>
+{% endblock %}
